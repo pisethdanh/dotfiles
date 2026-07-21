@@ -3,9 +3,15 @@
 # zinit + zsh plugins, Starship, and the CLI tools the zsh config expects.
 # Safe to re-run — every step is idempotent and existing real files are backed
 # up (not deleted) before being replaced with symlinks.
+#
+# Runnable two ways:
+#   curl -fsSL https://raw.githubusercontent.com/pisethdanh/dotfiles/main/install.sh | bash
+#   (or) git clone https://github.com/pisethdanh/dotfiles.git ~/code/dotfiles && ~/code/dotfiles/install.sh
+# Either way this repo ends up cloned to $DOTFILES_DIR below.
 set -euo pipefail
 
-DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DOTFILES_REPO="https://github.com/pisethdanh/dotfiles.git"
+DOTFILES_DIR="$HOME/code/dotfiles"
 
 info() { printf '\033[1;34m==>\033[0m %s\n' "$1"; }
 
@@ -32,6 +38,12 @@ if ! xcode-select -p >/dev/null 2>&1; then
   info "Installing Xcode Command Line Tools (follow the GUI prompt, then re-run this script)"
   xcode-select --install
   exit 1
+fi
+
+if [ ! -d "$DOTFILES_DIR/.git" ]; then
+  info "Cloning dotfiles to $DOTFILES_DIR"
+  mkdir -p "$(dirname "$DOTFILES_DIR")"
+  git clone "$DOTFILES_REPO" "$DOTFILES_DIR"
 fi
 
 if ! command -v brew >/dev/null 2>&1; then

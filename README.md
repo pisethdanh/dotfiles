@@ -5,9 +5,15 @@ macOS terminal setup: [Ghostty](https://ghostty.org) + [zinit](https://github.co
 ## Setup (new machine)
 
 ```sh
-git clone <this-repo-url> ~/code/dotfiles
-cd ~/code/dotfiles
-./install.sh
+curl -fsSL https://raw.githubusercontent.com/pisethdanh/dotfiles/main/install.sh | bash
+```
+
+No manual clone needed — the script clones itself to `~/code/dotfiles` first if
+it's not already there. Equivalently, clone it yourself and run it locally:
+
+```sh
+git clone https://github.com/pisethdanh/dotfiles.git ~/code/dotfiles
+~/code/dotfiles/install.sh
 ```
 
 Re-running `install.sh` is safe — it's idempotent, and any real file it would
