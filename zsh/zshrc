@@ -1,0 +1,56 @@
+export PATH="$HOME/.local/bin:$PATH"
+
+# User exports/aliases: one file per concern in ~/.config/zsh/, so this stays
+# small as they accumulate. To add more, drop a new *.zsh file in there —
+# nothing here needs to change.
+for f in ~/.config/zsh/*.zsh; do
+  source "$f"
+done
+
+# Zinit
+export ZINIT_HOME="$HOME/.local/share/zinit/zinit.git"
+source $ZINIT_HOME/zinit.zsh
+
+# Starship prompt
+eval "$(starship init zsh)"
+export STARSHIP_LOG=error
+
+# Completion (must run before fzf-tab)
+autoload -Uz compinit
+compinit -C
+
+# fzf key bindings (Ctrl-T file widget, Alt-C cd widget; Ctrl-R is atuin's, below).
+# Must load before fzf-tab: fzf-tab has to be the LAST thing to bind Tab, or
+# fzf's own Tab-completion silently overrides fzf-tab's completion menu.
+eval "$(fzf --zsh)"
+
+# Fuzzy tab-completion — replaces zsh-autocomplete, which was freezing the
+# session (known upstream issue when combined with zsh-autosuggestions).
+# Must load right after compinit, and after anything else that binds Tab.
+zinit light Aloxaf/fzf-tab
+
+# Loaded synchronously (not turbo) so there's no gap after a new shell opens
+# before suggestions/highlighting are active — both are cheap enough that the
+# startup-time cost isn't worth the momentary "nothing is loaded yet" window.
+zinit light zsh-users/zsh-autosuggestions
+zinit light zsh-users/zsh-syntax-highlighting
+
+# zoxide: smart `cd` history, kept as `z` rather than aliased over `cd` itself
+eval "$(zoxide init zsh)"
+
+# History
+HISTSIZE=2000
+SAVEHIST=2000
+setopt HIST_IGNORE_ALL_DUPS
+setopt SHARE_HISTORY
+
+# fnm: Node version manager (replaces nvm)
+eval "$(fnm env --use-on-cd)"
+
+# atuin: searchable shell history — must load last so it owns Ctrl-R
+eval "$(atuin init zsh)"
+
+# Compile zshrc
+if [[ ! -f ~/.zshrc.zwc || ~/.zshrc -nt ~/.zshrc.zwc ]]; then
+  zcompile ~/.zshrc
+fi
