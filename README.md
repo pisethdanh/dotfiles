@@ -21,10 +21,32 @@ overwrite gets backed up (`<file>.bak.<timestamp>`) instead of deleted.
 
 ## What it installs
 
-- Homebrew (if missing) + Xcode Command Line Tools prompt
-- Ghostty, Starship, zinit
-- fzf, zoxide, eza, atuin, fnm, kubectl, terraform, terragrunt
-- Node LTS via fnm
+Also installs Homebrew itself if missing, and prompts for the Xcode Command
+Line Tools (required for `git`/`brew`) if they aren't already present.
+
+### Via Homebrew
+
+| Tool | Description |
+| --- | --- |
+| [Ghostty](https://github.com/ghostty-org/ghostty) | GPU-accelerated terminal emulator. |
+| [Starship](https://github.com/starship/starship) | Fast, minimal, customizable prompt for any shell. |
+| [fzf](https://github.com/junegunn/fzf) | General-purpose command-line fuzzy finder; provides the Ctrl-T/Alt-C key bindings. |
+| [zoxide](https://github.com/ajeetdsouza/zoxide) | Smarter `cd` — jumps to frecent directories via `z`. |
+| [eza](https://github.com/eza-community/eza) | Modern, maintained replacement for `ls`. |
+| [atuin](https://github.com/atuinsh/atuin) | Searchable, SQLite-backed shell history (replaces Ctrl-R). |
+| [fnm](https://github.com/Schniz/fnm) | Fast, Rust-based Node.js version manager. Also installs Node LTS. |
+| [kubectl](https://github.com/kubernetes/kubectl) | Kubernetes command-line tool. |
+| [Terraform](https://github.com/hashicorp/terraform) | Infrastructure-as-code provisioning tool. |
+| [Terragrunt](https://github.com/gruntwork-io/terragrunt) | Thin wrapper for keeping Terraform configurations DRY. |
+
+### Via zinit (zsh plugins)
+
+| Tool | Description |
+| --- | --- |
+| [zinit](https://github.com/zdharma-continuum/zinit) | The zsh plugin manager itself — supports turbo-mode async loading. |
+| [fzf-tab](https://github.com/Aloxaf/fzf-tab) | Replaces zsh's tab-completion menu with an fzf-powered fuzzy one. |
+| [zsh-autosuggestions](https://github.com/zsh-users/zsh-autosuggestions) | Fish-like grey "ghost text" suggestions from history as you type. |
+| [zsh-syntax-highlighting](https://github.com/zsh-users/zsh-syntax-highlighting) | Fish-like syntax highlighting for commands as you type. |
 
 ## Layout
 
