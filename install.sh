@@ -56,21 +56,21 @@ info "Installing Ghostty"
 brew install --cask ghostty
 
 CLI_TOOLS=(
-  starship
-  fzf
-  zoxide
-  eza
   atuin
-  fnm
-  kubernetes-cli
-  terragrunt
   azure-cli
-  kubectx
+  Azure/kubelogin/kubelogin          # Azure's own tap — not the homebrew-core int128/kubelogin
   colima
   docker
-  helm
+  eza
+  fnm
+  fzf
   hashicorp/tap/terraform            # HashiCorp's own tap — no longer in homebrew-core
-  Azure/kubelogin/kubelogin          # Azure's own tap — not the homebrew-core int128/kubelogin
+  helm
+  kubectx
+  kubernetes-cli
+  starship
+  terragrunt
+  zoxide
 )
 
 info "Installing CLI tools (${CLI_TOOLS[*]})"

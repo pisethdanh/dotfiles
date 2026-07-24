@@ -28,22 +28,22 @@ Line Tools (required for `git`/`brew`) if they aren't already present.
 
 | Tool | Description |
 | --- | --- |
-| [Ghostty](https://github.com/ghostty-org/ghostty) | GPU-accelerated terminal emulator. |
-| [Starship](https://github.com/starship/starship) | Fast, minimal, customizable prompt for any shell. |
-| [fzf](https://github.com/junegunn/fzf) | General-purpose command-line fuzzy finder; provides the Ctrl-T/Alt-C key bindings. |
-| [zoxide](https://github.com/ajeetdsouza/zoxide) | Smarter `cd` — jumps to frecent directories via `z`. |
-| [eza](https://github.com/eza-community/eza) | Modern, maintained replacement for `ls`. |
 | [atuin](https://github.com/atuinsh/atuin) | Searchable, SQLite-backed shell history (replaces Ctrl-R). |
-| [fnm](https://github.com/Schniz/fnm) | Fast, Rust-based Node.js version manager. Also installs Node LTS. |
-| [kubectl](https://github.com/kubernetes/kubectl) | Kubernetes command-line tool. |
-| [Terraform](https://github.com/hashicorp/terraform) | Infrastructure-as-code provisioning tool. |
-| [Terragrunt](https://github.com/gruntwork-io/terragrunt) | Thin wrapper for keeping Terraform configurations DRY. |
 | [Azure CLI](https://github.com/Azure/azure-cli) | Command-line tool for managing Azure resources. |
-| [kubelogin](https://github.com/Azure/kubelogin) | kubectl credential plugin for Azure AD login to AKS clusters. |
-| [kubectx](https://github.com/ahmetb/kubectx) | Fast switching between kubectl contexts (`kubectx`) and namespaces (`kubens`). |
 | [Colima](https://github.com/abiosoft/colima) | Container runtimes on macOS with minimal setup, as a Docker Desktop alternative. |
 | [Docker CLI](https://github.com/docker/cli) | Docker command-line client, used against the Colima runtime. |
+| [eza](https://github.com/eza-community/eza) | Modern, maintained replacement for `ls`. |
+| [fnm](https://github.com/Schniz/fnm) | Fast, Rust-based Node.js version manager. Also installs Node LTS. |
+| [fzf](https://github.com/junegunn/fzf) | General-purpose command-line fuzzy finder; provides the Ctrl-T/Alt-C key bindings. |
+| [Ghostty](https://github.com/ghostty-org/ghostty) | GPU-accelerated terminal emulator. |
 | [Helm](https://github.com/helm/helm) | Package manager for Kubernetes. |
+| [kubectl](https://github.com/kubernetes/kubectl) | Kubernetes command-line tool. |
+| [kubectx](https://github.com/ahmetb/kubectx) | Fast switching between kubectl contexts (`kubectx`) and namespaces (`kubens`). |
+| [kubelogin](https://github.com/Azure/kubelogin) | kubectl credential plugin for Azure AD login to AKS clusters. |
+| [Starship](https://github.com/starship/starship) | Fast, minimal, customizable prompt for any shell. |
+| [Terraform](https://github.com/hashicorp/terraform) | Infrastructure-as-code provisioning tool. |
+| [Terragrunt](https://github.com/gruntwork-io/terragrunt) | Thin wrapper for keeping Terraform configurations DRY. |
+| [zoxide](https://github.com/ajeetdsouza/zoxide) | Smarter `cd` — jumps to frecent directories via `z`. |
 
 `install.sh` only installs the Colima/Docker CLIs — it doesn't start the VM.
 Run `colima start` once to bring up the container runtime before using `docker`.
