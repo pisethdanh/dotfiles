@@ -54,6 +54,7 @@ Line Tools (required for `git`/`brew`) if they aren't already present.
 | ---------------------------- | ---------------------------------------------------------------------- |
 | `zsh/zshrc`                  | `~/.zshrc`                                                              |
 | `zsh/aliases.zsh`             | `~/.config/zsh/aliases.zsh`                                             |
+| `zsh/path.zsh`                | `~/.config/zsh/path.zsh`                                                |
 | `starship/starship.toml`      | `~/.config/starship.toml`                                               |
 | `ghostty/config.ghostty`      | `~/Library/Application Support/com.mitchellh.ghostty/config.ghostty`    |
 
