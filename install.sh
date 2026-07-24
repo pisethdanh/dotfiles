@@ -55,11 +55,26 @@ fi
 info "Installing Ghostty"
 brew install --cask ghostty
 
-info "Installing CLI tools (starship, fzf, zoxide, eza, atuin, fnm, kubectl, terragrunt)"
-brew install starship fzf zoxide eza atuin fnm kubernetes-cli terragrunt
+CLI_TOOLS=(
+  starship
+  fzf
+  zoxide
+  eza
+  atuin
+  fnm
+  kubernetes-cli
+  terragrunt
+  azure-cli
+  kubectx
+  colima
+  docker
+  helm
+  hashicorp/tap/terraform            # HashiCorp's own tap — no longer in homebrew-core
+  Azure/kubelogin/kubelogin          # Azure's own tap — not the homebrew-core int128/kubelogin
+)
 
-info "Installing Terraform (HashiCorp's own tap — no longer in homebrew-core)"
-brew install hashicorp/tap/terraform
+info "Installing CLI tools (${CLI_TOOLS[*]})"
+brew install "${CLI_TOOLS[@]}"
 
 ZINIT_HOME="$HOME/.local/share/zinit/zinit.git"
 if [ ! -d "$ZINIT_HOME" ]; then

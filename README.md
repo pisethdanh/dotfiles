@@ -38,6 +38,15 @@ Line Tools (required for `git`/`brew`) if they aren't already present.
 | [kubectl](https://github.com/kubernetes/kubectl) | Kubernetes command-line tool. |
 | [Terraform](https://github.com/hashicorp/terraform) | Infrastructure-as-code provisioning tool. |
 | [Terragrunt](https://github.com/gruntwork-io/terragrunt) | Thin wrapper for keeping Terraform configurations DRY. |
+| [Azure CLI](https://github.com/Azure/azure-cli) | Command-line tool for managing Azure resources. |
+| [kubelogin](https://github.com/Azure/kubelogin) | kubectl credential plugin for Azure AD login to AKS clusters. |
+| [kubectx](https://github.com/ahmetb/kubectx) | Fast switching between kubectl contexts (`kubectx`) and namespaces (`kubens`). |
+| [Colima](https://github.com/abiosoft/colima) | Container runtimes on macOS with minimal setup, as a Docker Desktop alternative. |
+| [Docker CLI](https://github.com/docker/cli) | Docker command-line client, used against the Colima runtime. |
+| [Helm](https://github.com/helm/helm) | Package manager for Kubernetes. |
+
+`install.sh` only installs the Colima/Docker CLIs — it doesn't start the VM.
+Run `colima start` once to bring up the container runtime before using `docker`.
 
 ### Via zinit (zsh plugins)
 
