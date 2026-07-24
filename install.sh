@@ -55,6 +55,9 @@ fi
 info "Installing Ghostty"
 brew install --cask ghostty
 
+info "Installing JetBrains Mono Nerd Font"
+brew install --cask font-jetbrains-mono-nerd-font
+
 CLI_TOOLS=(
   atuin
   azure-cli
