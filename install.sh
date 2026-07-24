@@ -94,6 +94,13 @@ link_file "$DOTFILES_DIR/zsh/path.zsh" "$HOME/.config/zsh/path.zsh"
 link_file "$DOTFILES_DIR/starship/starship.toml" "$HOME/.config/starship.toml"
 link_file "$DOTFILES_DIR/ghostty/config.ghostty" "$HOME/Library/Application Support/com.mitchellh.ghostty/config.ghostty"
 
+if command -v pwsh >/dev/null 2>&1; then
+  link_file "$DOTFILES_DIR/starship/starship-pwsh.toml" "$HOME/.config/starship-pwsh.toml"
+  link_file "$DOTFILES_DIR/pwsh/profile.ps1" "$(pwsh -NoProfile -Command 'Write-Output $PROFILE')"
+  info "Installing PSFzf (pwsh fuzzy completion)"
+  pwsh -NoProfile -Command "Install-Module -Name PSFzf -Scope CurrentUser -Repository PSGallery -Force"
+fi
+
 EXPORTS="$HOME/.config/zsh/exports.zsh"
 if [ ! -e "$EXPORTS" ]; then
   info "Creating $EXPORTS from template — edit it to fill in real secrets"

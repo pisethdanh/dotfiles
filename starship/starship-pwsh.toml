@@ -1,0 +1,73 @@
+# Separate theme from the zsh prompt (starship.toml, Catppuccin Mocha) so
+# it's obvious at a glance which shell a pane is running. Tokyo Night colors
+# + the "pwsh❯" symbol below make that distinction, single line like zsh.
+add_newline = false
+
+format = """
+$directory\
+$git_branch\
+$git_status\
+$character\
+"""
+
+palette = "tokyo_night"
+
+[palettes.tokyo_night]
+bg = "#1a1b26"
+bg_dark = "#16161e"
+bg_highlight = "#292e42"
+terminal_black = "#414868"
+fg = "#c0caf5"
+fg_dark = "#a9b1d6"
+comment = "#565f89"
+blue = "#7aa2f7"
+cyan = "#7dcfff"
+magenta = "#bb9af7"
+purple = "#9d7cd8"
+orange = "#ff9e64"
+yellow = "#e0af68"
+green = "#9ece6a"
+teal = "#73daca"
+red = "#f7768e"
+
+[os]
+disabled = true
+
+[directory]
+style = "yellow"
+truncation_length = 3
+truncate_to_repo = true
+
+[git_branch]
+style = "teal"
+format = '[$symbol$branch]($style) '
+
+[git_status]
+style = "red"
+format = '[$all_status$ahead_behind]($style) '
+
+# "pwsh>" instead of zsh's "❯", and cyan instead of zsh's green — the
+# success symbol is the part you glance at most, so it needs its own color,
+# not just a different name. Warm yellow/teal here vs. zsh's cool
+# lavender/mauve keeps the two prompts from reading as the same scheme.
+[character]
+success_symbol = "[pwsh❯](cyan)"
+error_symbol = "[pwsh❯](red)"
+
+[package]
+disabled = true
+
+[nodejs]
+disabled = true
+
+[aws]
+disabled = true
+
+[gcloud]
+disabled = true
+
+[battery]
+disabled = true
+
+[time]
+disabled = true
