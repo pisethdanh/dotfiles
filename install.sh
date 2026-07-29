@@ -14,11 +14,48 @@ DOTFILES_REPO="https://github.com/pisethdanh/dotfiles.git"
 DOTFILES_DIR="$HOME/code/dotfiles"
 
 info() { printf '\033[1;34m==>\033[0m %s\n' "$1"; }
+warn() { printf '\033[1;33m!!\033[0m %s\n' "$1" >&2; }
+
+# Newline-delimited list of steps that failed, reported in the closing summary.
+FAILED_STEPS=""
+
+# Runs a step whose failure shouldn't sink the whole install (a cask that
+# collides with a hand-installed app, a tap that's down, no network). Warns,
+# records the step, and always succeeds so `set -e` doesn't abort the run.
+try_step() {
+  local label="$1"
+  shift
+  if ! "$@"; then
+    warn "$label failed — continuing with the rest of the install"
+    FAILED_STEPS+="  - $label"$'\n'
+  fi
+  return 0
+}
+
+# `brew install --cask` errors out (rather than no-oping) when the app or font
+# is already on disk but wasn't installed by brew — e.g. a font dragged into
+# Font Book, or an app dropped straight into /Applications. --force adopts what
+# is already there instead of failing.
+install_cask() {
+  local cask="$1"
+  if brew list --cask "$cask" >/dev/null 2>&1; then
+    info "$cask already installed — skipping"
+    return 0
+  fi
+  info "Installing $cask"
+  try_step "$cask" brew install --cask --force "$cask"
+}
 
 link_file() {
   local src="$1" dest="$2"
   mkdir -p "$(dirname "$dest")"
   if [ -L "$dest" ]; then
+    local current
+    current="$(readlink "$dest")"
+    # Only worth reporting when it pointed elsewhere — e.g. a link left by
+    # another dotfiles manager — since that target is otherwise lost silently.
+    # Re-runs of our own links stay quiet.
+    [ "$current" = "$src" ] || info "Replacing symlink $dest (was -> $current)"
     rm "$dest"
   elif [ -e "$dest" ]; then
     local backup="$dest.bak.$(date +%Y%m%d%H%M%S)"
@@ -52,11 +89,8 @@ if ! command -v brew >/dev/null 2>&1; then
   eval "$(/opt/homebrew/bin/brew shellenv)"
 fi
 
-info "Installing Ghostty"
-brew install --cask ghostty
-
-info "Installing JetBrains Mono Nerd Font"
-brew install --cask font-jetbrains-mono-nerd-font
+install_cask ghostty
+install_cask font-jetbrains-mono-nerd-font
 
 CLI_TOOLS=(
   atuin
@@ -69,6 +103,8 @@ CLI_TOOLS=(
   fzf
   hashicorp/tap/terraform            # HashiCorp's own tap — no longer in homebrew-core
   helm
+  istioctl
+  jq
   kubectx
   kubernetes-cli
   starship
@@ -77,7 +113,14 @@ CLI_TOOLS=(
 )
 
 info "Installing CLI tools (${CLI_TOOLS[*]})"
-brew install "${CLI_TOOLS[@]}"
+if ! brew install "${CLI_TOOLS[@]}"; then
+  # A single unavailable formula or tap fails the whole batch, so fall back to
+  # one-at-a-time to get everything that *can* install rather than none of it.
+  warn "Batch install failed — retrying each tool individually"
+  for tool in "${CLI_TOOLS[@]}"; do
+    try_step "$tool" brew install "$tool"
+  done
+fi
 
 ZINIT_HOME="$HOME/.local/share/zinit/zinit.git"
 if [ ! -d "$ZINIT_HOME" ]; then
@@ -87,8 +130,7 @@ if [ ! -d "$ZINIT_HOME" ]; then
 fi
 
 info "Installing Node LTS via fnm"
-fnm install --lts
-fnm default lts-latest
+try_step "Node LTS via fnm" bash -c 'fnm install --lts && fnm default lts-latest'
 
 info "Linking dotfiles"
 link_file "$DOTFILES_DIR/zsh/zshrc" "$HOME/.zshrc"
@@ -101,14 +143,25 @@ if command -v pwsh >/dev/null 2>&1; then
   link_file "$DOTFILES_DIR/starship/starship-pwsh.toml" "$HOME/.config/starship-pwsh.toml"
   link_file "$DOTFILES_DIR/pwsh/profile.ps1" "$(pwsh -NoProfile -Command 'Write-Output $PROFILE')"
   info "Installing PSFzf (pwsh fuzzy completion)"
-  pwsh -NoProfile -Command "Install-Module -Name PSFzf -Scope CurrentUser -Repository PSGallery -Force"
+  try_step "PSFzf" pwsh -NoProfile -Command "Install-Module -Name PSFzf -Scope CurrentUser -Repository PSGallery -Force"
 fi
 
+# Copied rather than symlinked: this is where real secrets go, so it has to live
+# outside the repo. Everything in it ships commented out, so a fresh install is
+# complete without touching it.
+# -L as well as -e: a dangling symlink is invisible to -e, and cp would follow it
+# and write the template through to wherever it points.
 EXPORTS="$HOME/.config/zsh/exports.zsh"
-if [ ! -e "$EXPORTS" ]; then
-  info "Creating $EXPORTS from template — edit it to fill in real secrets"
+if [ ! -e "$EXPORTS" ] && [ ! -L "$EXPORTS" ]; then
+  info "Creating $EXPORTS — uncomment a line in it if/when you need that token"
   mkdir -p "$(dirname "$EXPORTS")"
-  cp "$DOTFILES_DIR/zsh/exports.zsh.example" "$EXPORTS"
+  cp "$DOTFILES_DIR/zsh/exports.zsh" "$EXPORTS"
+fi
+
+if [ -n "$FAILED_STEPS" ]; then
+  warn "Finished, but these steps failed and need a look:"
+  printf '%s' "$FAILED_STEPS" >&2
+  warn "Everything else was installed. Re-run this script after fixing them."
 fi
 
 info "Done. Open a new terminal tab (or: exec zsh) to pick everything up."

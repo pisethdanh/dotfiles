@@ -30,6 +30,7 @@ if (Get-Command eza -ErrorAction SilentlyContinue) {
 }
 
 # Infra tooling, matching the zsh aliases.
+if (Get-Command istioctl -ErrorAction SilentlyContinue) { Set-Alias -Name ic -Value istioctl }
 if (Get-Command kubectl -ErrorAction SilentlyContinue) { Set-Alias -Name k -Value kubectl }
 if (Get-Command terraform -ErrorAction SilentlyContinue) { Set-Alias -Name tf -Value terraform }
 if (Get-Command terragrunt -ErrorAction SilentlyContinue) { Set-Alias -Name tg -Value terragrunt }

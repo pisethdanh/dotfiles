@@ -19,6 +19,10 @@ git clone https://github.com/pisethdanh/dotfiles.git ~/code/dotfiles
 Re-running `install.sh` is safe — it's idempotent, and any real file it would
 overwrite gets backed up (`<file>.bak.<timestamp>`) instead of deleted.
 
+Individual install steps are also non-fatal: if one fails (an app or font
+already installed by hand, a tap that's down, no network) the script warns,
+keeps going, and lists everything that failed at the end.
+
 ## What it installs
 
 Also installs Homebrew itself if missing, and prompts for the Xcode Command
@@ -37,12 +41,14 @@ Line Tools (required for `git`/`brew`) if they aren't already present.
 | [fzf](https://github.com/junegunn/fzf) | General-purpose command-line fuzzy finder; provides the Ctrl-T/Alt-C key bindings. |
 | [Ghostty](https://github.com/ghostty-org/ghostty) | GPU-accelerated terminal emulator. |
 | [Helm](https://github.com/helm/helm) | Package manager for Kubernetes. |
-| [kubectl](https://github.com/kubernetes/kubectl) | Kubernetes command-line tool. |
+| [istioctl](https://github.com/istio/istio) | CLI for configuring and debugging an Istio service mesh (aliased to `ic`). |
+| [jq](https://github.com/jqlang/jq) | Command-line JSON processor. |
+| [kubectl](https://github.com/kubernetes/kubectl) | Kubernetes command-line tool (aliased to `k`). |
 | [kubectx](https://github.com/ahmetb/kubectx) | Fast switching between kubectl contexts (`kubectx`) and namespaces (`kubens`). |
 | [kubelogin](https://github.com/Azure/kubelogin) | kubectl credential plugin for Azure AD login to AKS clusters. |
 | [Starship](https://github.com/starship/starship) | Fast, minimal, customizable prompt for any shell. |
-| [Terraform](https://github.com/hashicorp/terraform) | Infrastructure-as-code provisioning tool. |
-| [Terragrunt](https://github.com/gruntwork-io/terragrunt) | Thin wrapper for keeping Terraform configurations DRY. |
+| [Terraform](https://github.com/hashicorp/terraform) | Infrastructure-as-code provisioning tool (aliased to `tf`). |
+| [Terragrunt](https://github.com/gruntwork-io/terragrunt) | Thin wrapper for keeping Terraform configurations DRY (aliased to `tg`). |
 | [zoxide](https://github.com/ajeetdsouza/zoxide) | Smarter `cd` — jumps to frecent directories via `z`. |
 
 `install.sh` only installs the Colima/Docker CLIs — it doesn't start the VM.
@@ -59,18 +65,38 @@ Run `colima start` once to bring up the container runtime before using `docker`.
 
 ## Layout
 
-| Path                        | Symlinked to                                                          |
-| ---------------------------- | ---------------------------------------------------------------------- |
-| `zsh/zshrc`                  | `~/.zshrc`                                                              |
-| `zsh/aliases.zsh`             | `~/.config/zsh/aliases.zsh`                                             |
-| `zsh/path.zsh`                | `~/.config/zsh/path.zsh`                                                |
-| `starship/starship.toml`      | `~/.config/starship.toml`                                               |
-| `ghostty/config.ghostty`      | `~/Library/Application Support/com.mitchellh.ghostty/config.ghostty`    |
+| Path | Symlinked to |
+| --- | --- |
+| `zsh/zshrc` | `~/.zshrc` |
+| `zsh/aliases.zsh` | `~/.config/zsh/aliases.zsh` |
+| `zsh/path.zsh` | `~/.config/zsh/path.zsh` |
+| `starship/starship.toml` | `~/.config/starship.toml` |
+| `ghostty/config.ghostty` | `~/Library/Application Support/com.mitchellh.ghostty/config.ghostty` |
 
 `~/.zshrc` sources every `*.zsh` file in `~/.config/zsh/` — drop a new file
 there for more aliases/exports without editing `.zshrc` itself.
 
-`zsh/exports.zsh.example` is a template for `~/.config/zsh/exports.zsh`, which
-holds real secrets (e.g. `NUGET_AUTH_TOKEN`) and is deliberately **not**
-tracked by git (see `.gitignore`). `install.sh` copies the template on first
-run if the real file doesn't exist yet — fill in actual values after that.
+`zsh/exports.zsh` holds environment variables for secrets/tokens (e.g.
+`NUGET_AUTH_TOKEN`), all commented out. `install.sh` **copies** it to
+`~/.config/zsh/exports.zsh` on first run if that file doesn't exist yet — a
+copy rather than a symlink so real values live outside the repo and can't be
+committed by accident. Nothing needs filling in for a working shell; uncomment
+a line in the copy if and when you need it.
+
+### If those files already exist
+
+Everything in the table above is repo-owned, so `install.sh` **replaces** it on
+every run — the symlink is how a `git pull` reaches your shell. Nothing is
+thrown away silently:
+
+| Already at the target | What `install.sh` does |
+| --- | --- |
+| A real file or directory | Moves it to `<file>.bak.<timestamp>`, then symlinks. |
+| A symlink into this repo | Recreates it — a no-op, and stays quiet about it. |
+| A symlink pointing elsewhere | Recreates it, logging the old target first (the file it pointed at is untouched). |
+
+`~/.config/zsh/exports.zsh` is the one exception: it's yours, not the repo's, so
+once it exists `install.sh` leaves it alone entirely — never overwritten, never
+backed up. Your secrets survive every re-run. The trade-off is that new lines
+added to `zsh/exports.zsh` later don't reach machines that already have the
+copy; add those by hand.

@@ -1,5 +1,0 @@
-# Copy this file to ~/.config/zsh/exports.zsh and fill in real values.
-# exports.zsh itself is intentionally untracked (see .gitignore) since it
-# holds real secrets/tokens — never commit it.
-
-export NUGET_AUTH_TOKEN=REPLACE_ME
