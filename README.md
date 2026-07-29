@@ -72,6 +72,8 @@ Run `colima start` once to bring up the container runtime before using `docker`.
 | `zsh/path.zsh` | `~/.config/zsh/path.zsh` |
 | `starship/starship.toml` | `~/.config/starship.toml` |
 | `ghostty/config.ghostty` | `~/Library/Application Support/com.mitchellh.ghostty/config.ghostty` |
+| `pwsh/profile.ps1` | pwsh's `$PROFILE` (only when `pwsh` is installed) |
+| `starship/starship-pwsh.toml` | `~/.config/starship-pwsh.toml` (same condition) |
 
 `~/.zshrc` sources every `*.zsh` file in `~/.config/zsh/` — drop a new file
 there for more aliases/exports without editing `.zshrc` itself.
@@ -100,3 +102,15 @@ once it exists `install.sh` leaves it alone entirely — never overwritten, neve
 backed up. Your secrets survive every re-run. The trade-off is that new lines
 added to `zsh/exports.zsh` later don't reach machines that already have the
 copy; add those by hand.
+
+### Machine-local pwsh config
+
+`$PROFILE` is a symlink to `pwsh/profile.ps1`, so it gets replaced on every run
+— don't edit it in place. Instead, drop a `*.ps1` file in
+`~/.config/powershell/conf.d/` (untracked; `install.sh` creates the directory
+but never writes to it). The profile dot-sources everything in there in name
+order, after its own defaults, so those files can override them. It's the pwsh
+counterpart to `~/.config/zsh/*.zsh`.
+
+That's where per-repo workflows and anything credential-adjacent belong: a
+relink can't touch them, and they can't end up committed here.

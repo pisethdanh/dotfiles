@@ -142,6 +142,9 @@ link_file "$DOTFILES_DIR/ghostty/config.ghostty" "$HOME/Library/Application Supp
 if command -v pwsh >/dev/null 2>&1; then
   link_file "$DOTFILES_DIR/starship/starship-pwsh.toml" "$HOME/.config/starship-pwsh.toml"
   link_file "$DOTFILES_DIR/pwsh/profile.ps1" "$(pwsh -NoProfile -Command 'Write-Output $PROFILE')"
+  # Machine-local pwsh config the profile dot-sources; never populated by this
+  # script, so anything dropped in there survives a relink.
+  mkdir -p "$HOME/.config/powershell/conf.d"
   info "Installing PSFzf (pwsh fuzzy completion)"
   try_step "PSFzf" pwsh -NoProfile -Command "Install-Module -Name PSFzf -Scope CurrentUser -Repository PSGallery -Force"
 fi

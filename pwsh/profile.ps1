@@ -34,3 +34,15 @@ if (Get-Command istioctl -ErrorAction SilentlyContinue) { Set-Alias -Name ic -Va
 if (Get-Command kubectl -ErrorAction SilentlyContinue) { Set-Alias -Name k -Value kubectl }
 if (Get-Command terraform -ErrorAction SilentlyContinue) { Set-Alias -Name tf -Value terraform }
 if (Get-Command terragrunt -ErrorAction SilentlyContinue) { Set-Alias -Name tg -Value terragrunt }
+
+# Machine-local additions, mirroring how ~/.zshrc reads ~/.config/zsh/*.zsh:
+# every *.ps1 in conf.d is dot-sourced, in name order, after everything above —
+# so it can override these defaults. That directory is untracked, which is where
+# per-repo workflows and anything secret-adjacent belong: install.sh relinks
+# $PROFILE on every run, and nothing in conf.d is affected by that.
+$ConfD = "$HOME/.config/powershell/conf.d"
+if (Test-Path $ConfD) {
+    foreach ($f in Get-ChildItem -Path $ConfD -Filter '*.ps1' | Sort-Object Name) {
+        . $f.FullName
+    }
+}
