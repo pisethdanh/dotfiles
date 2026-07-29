@@ -19,6 +19,26 @@ if (Get-Module -ListAvailable -Name PSFzf) {
     Set-PsFzfOption -TabExpansion
 }
 
+# Shell integrations. These are the ones that aren't just a binary on PATH: each
+# tool generates shell-specific functions that have to be eval'd per shell, which
+# is why `zoxide` resolves in pwsh but `z` doesn't until this runs. Mirrors the
+# eval "$(... init zsh)" lines in ~/.zshrc.
+if (Get-Command zoxide -ErrorAction SilentlyContinue) {
+    Invoke-Expression (& { (zoxide init powershell | Out-String) })
+}
+
+# Sets PATH for the active Node version, so this has to run before anything that
+# shells out to node.
+if (Get-Command fnm -ErrorAction SilentlyContinue) {
+    fnm env --use-on-cd --shell power-shell | Out-String | Invoke-Expression
+}
+
+# Last of the integrations so it owns Ctrl-R, same reasoning as in ~/.zshrc —
+# PSFzf above binds Ctrl-R too, and whoever binds last wins.
+if (Get-Command atuin -ErrorAction SilentlyContinue) {
+    atuin init powershell | Out-String | Invoke-Expression
+}
+
 # eza-backed ls, matching the zsh aliases. ll/la/lt bake in flags, and
 # Set-Alias can't attach arguments, so those stay functions; plain `ls` is a
 # straight 1:1 mapping so Set-Alias works.
