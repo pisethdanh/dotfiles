@@ -142,11 +142,22 @@ link_file "$DOTFILES_DIR/ghostty/config.ghostty" "$HOME/Library/Application Supp
 if command -v pwsh >/dev/null 2>&1; then
   link_file "$DOTFILES_DIR/starship/starship-pwsh.toml" "$HOME/.config/starship-pwsh.toml"
   link_file "$DOTFILES_DIR/pwsh/profile.ps1" "$(pwsh -NoProfile -Command 'Write-Output $PROFILE')"
-  # Machine-local pwsh config the profile dot-sources; never populated by this
-  # script, so anything dropped in there survives a relink.
+  # Machine-local pwsh config the profile dot-sources. This script only ever adds
+  # its own files here, so anything else dropped in survives a relink.
   mkdir -p "$HOME/.config/powershell/conf.d"
+  link_file "$DOTFILES_DIR/pwsh/entra.ps1" "$HOME/.config/powershell/conf.d/entra.ps1"
   info "Installing PSFzf (pwsh fuzzy completion)"
   try_step "PSFzf" pwsh -NoProfile -Command "Install-Module -Name PSFzf -Scope CurrentUser -Repository PSGallery -Force"
+fi
+
+# Copied, not symlinked, for the same reason as exports.zsh: it accumulates real
+# tenant identities, so it has to live outside the repo. Ships empty, so a fresh
+# install is complete without it — onboard with Add-EntraTenant when needed.
+ENTRA_TENANTS="$HOME/.config/entra/tenants.json"
+if [ ! -e "$ENTRA_TENANTS" ] && [ ! -L "$ENTRA_TENANTS" ]; then
+  info "Creating $ENTRA_TENANTS — onboard tenants with Add-EntraTenant"
+  mkdir -p "$(dirname "$ENTRA_TENANTS")"
+  cp "$DOTFILES_DIR/pwsh/tenants.json" "$ENTRA_TENANTS"
 fi
 
 # Copied rather than symlinked: this is where real secrets go, so it has to live
@@ -159,6 +170,30 @@ if [ ! -e "$EXPORTS" ] && [ ! -L "$EXPORTS" ]; then
   info "Creating $EXPORTS — uncomment a line in it if/when you need that token"
   mkdir -p "$(dirname "$EXPORTS")"
   cp "$DOTFILES_DIR/zsh/exports.zsh" "$EXPORTS"
+fi
+
+# Container runtime for the docker CLI. Left until last: creating the VM takes a
+# few minutes on first run, and there's no reason to delay the shell config for
+# it. Skipped entirely when Colima is already up, so re-runs are cheap.
+#
+# Colima defaults to 2 CPU / 2GiB, which is thin for a Kubernetes/Helm workload,
+# so scale to the host instead of hardcoding this machine's numbers. Its 100GiB
+# disk default is already fine. Export COLIMA_CPUS/COLIMA_MEMORY to override.
+# Sizing applies at creation only — an existing VM keeps what it was built with.
+if command -v colima >/dev/null 2>&1; then
+  if colima status >/dev/null 2>&1; then
+    info "Colima already running"
+  elif colima list --json 2>/dev/null | grep -q '"name":"default"'; then
+    info "Starting existing Colima VM"
+    try_step "colima start" colima start
+  else
+    COLIMA_CPUS="${COLIMA_CPUS:-$(( $(sysctl -n hw.ncpu) / 2 ))}"
+    COLIMA_MEMORY="${COLIMA_MEMORY:-$(( $(sysctl -n hw.memsize) / 1073741824 / 3 ))}"
+    if [ "$COLIMA_CPUS" -lt 2 ]; then COLIMA_CPUS=2; fi
+    if [ "$COLIMA_MEMORY" -lt 2 ]; then COLIMA_MEMORY=2; fi
+    info "Creating Colima VM (${COLIMA_CPUS} CPU, ${COLIMA_MEMORY}GiB) — first run takes a few minutes"
+    try_step "colima start" colima start --cpus "$COLIMA_CPUS" --memory "$COLIMA_MEMORY"
+  fi
 fi
 
 if [ -n "$FAILED_STEPS" ]; then

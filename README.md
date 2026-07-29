@@ -51,8 +51,15 @@ Line Tools (required for `git`/`brew`) if they aren't already present.
 | [Terragrunt](https://github.com/gruntwork-io/terragrunt) | Thin wrapper for keeping Terraform configurations DRY (aliased to `tg`). |
 | [zoxide](https://github.com/ajeetdsouza/zoxide) | Smarter `cd` — jumps to frecent directories via `z`. |
 
-`install.sh` only installs the Colima/Docker CLIs — it doesn't start the VM.
-Run `colima start` once to bring up the container runtime before using `docker`.
+`install.sh` starts Colima for you as its last step, so `docker` works straight
+after a fresh install. The VM is only created once — later runs skip the step if
+it's already up, and start it without touching its configuration if it isn't.
+
+Colima's own defaults (2 CPU / 2GiB) are thin for a Kubernetes workload, so a
+newly created VM gets half the host's cores and a third of its RAM. Override
+with `COLIMA_CPUS=8 COLIMA_MEMORY=12 ./install.sh`, or resize later with
+`colima stop && colima start --cpus 8 --memory 12`. Sizing only applies when the
+VM is created — an existing one keeps whatever it was built with.
 
 ### Via zinit (zsh plugins)
 
@@ -114,3 +121,64 @@ counterpart to `~/.config/zsh/*.zsh`.
 
 That's where per-repo workflows and anything credential-adjacent belong: a
 relink can't touch them, and they can't end up committed here.
+
+`pwsh/entra.ps1` is installed into that directory as a symlink, so it updates
+with a `git pull` like everything else:
+
+| Command | |
+| --- | --- |
+| `Add-EntraTenant -User admin@<tenant>.onmicrosoft.com` | Onboard a tenant: looks the tenant id up from the domain, prompts for the password, stores it in the login keychain |
+| `Get-EntraTenant` | List configured tenants and whether each password is stored |
+| `Remove-EntraTenant -Name <name>` | Drop one (keeps the keychain password unless `-IncludeSecret`) |
+| `setenv [-Tenant <name>]` | Point the **current git repo** at a tenant: sets the configured environment variables and rewrites the configured dotenv keys |
+
+The target is always the repo you're standing in — resolved via `git rev-parse
+--show-toplevel` rather than a configured path — so worktrees and second clones
+work with no extra setup.
+
+`entra.ps1` itself is generic: it knows how to onboard a tenant and substitute
+values, but not what any project calls them. That mapping lives in
+`~/.config/entra/tenants.json` under `apply`, which names the variables to set,
+the dotenv file to rewrite and an optional per-repo script to run first. Values
+are templates over `{user}`, `{password}`, `{tenantId}` and `{name}`:
+
+```json
+"apply": {
+  "envFile": ".env",
+  "env":  { "AZURE_USER": "{user}", "AZURE_TENANT_ID": "{tenantId}" },
+  "file": { "AZURE_USER": "{user}", "AZURE_PASSWORD": "{password}" }
+}
+```
+
+`install.sh` **copies** that file from `pwsh/tenants.json` on first run and then
+never touches it — same copy-not-symlink reasoning as `exports.zsh`. It ships
+with an empty `apply`, so no project's variable names end up in this repo.
+
+#### Passwords in the keychain
+
+Passwords are never in `tenants.json`. They go to the login keychain under
+service `entra`, keyed on the account's UPN — unique by construction, so there's
+no invented name to collide or drift out of sync with the tenant it belongs to.
+
+`Add-EntraTenant` and `Remove-EntraTenant -IncludeSecret` manage them. To audit
+or fix one up by hand, `security` does the same job. There's no flag to filter
+items by service, hence the `awk` — this lists every account with a stored
+password:
+
+```sh
+security dump-keychain | awk '/"acct"<blob>=/{a=$0} /"svce"<blob>="entra"/{print a}'
+```
+
+Then read, store/update, or delete a single one:
+
+```sh
+security find-generic-password -s entra -a 'admin@contoso.onmicrosoft.com' -w
+security add-generic-password -U -s entra -a 'admin@contoso.onmicrosoft.com' -w
+security delete-generic-password -s entra -a 'admin@contoso.onmicrosoft.com'
+```
+
+`-w` with no value prompts for the password twice to confirm, so it never lands
+in shell history; `-U` updates an existing entry instead of failing on it.
+Keychain Access.app searched for `entra` shows the same items if you'd rather
+click. A missing entry is what makes `Get-EntraTenant` report `MISSING` for a
+tenant that's otherwise configured.

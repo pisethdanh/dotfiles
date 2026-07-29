@@ -1,0 +1,28 @@
+{
+  "_comment": [
+    "Local tenant store for pwsh/entra.ps1. install.sh copies this here on first",
+    "run and never touches it again, so it stays out of git.",
+    "",
+    "tenants: managed by Add-EntraTenant / Remove-EntraTenant. Passwords are not",
+    "here; they live in the login keychain under service 'entra', keyed on the UPN.",
+    "",
+    "apply: what `setenv` does in the repo you're standing in. Fill this in per",
+    "project — it is deliberately empty here so no project's variable names live",
+    "in the dotfiles repo.",
+    "  envScript  optional script, relative to the repo root, run before the",
+    "             values below are applied (so these override it)",
+    "  envFile    dotenv file to rewrite, relative to the repo root",
+    "  env        NAME -> template, set as process environment variables",
+    "  file       KEY  -> template, upserted into envFile",
+    "Templates substitute {user}, {password}, {tenantId} and {name}, e.g.",
+    "  \"env\": { \"AZURE_USER\": \"{user}\", \"AZURE_TENANT_ID\": \"{tenantId}\" }"
+  ],
+  "default": null,
+  "tenants": {},
+  "apply": {
+    "envScript": null,
+    "envFile": ".env",
+    "env": {},
+    "file": {}
+  }
+}
